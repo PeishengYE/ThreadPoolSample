@@ -20,6 +20,7 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.util.Log;
 
 import org.apache.http.HttpStatus;
 import org.xmlpull.v1.XmlPullParserException;
@@ -89,7 +90,7 @@ public class RSSPullService extends IntentService {
 
             // Convert the incoming data string to a URL.
             localURL = new URL(localUrlString);
-
+            Log.i(LOG_TAG, "onHandleIntent()>> starting connecting to server: " + localUrlString);
             /*
              * Tries to open a connection to the URL. If an IO error occurs, this throws an
              * IOException
@@ -162,21 +163,23 @@ public class RSSPullService extends IntentService {
 
                 // Reports that the service is about to connect to the RSS feed
                 mBroadcaster.broadcastIntentWithState(Constants.STATE_ACTION_CONNECTING);
-
+                Log.i(LOG_TAG, "onHandleIntent()>> starting connecting to server: connecting" );
                 // Gets a response code from the RSS server
                 int responseCode = localHttpURLConnection.getResponseCode();
-
+                Log.i(LOG_TAG, "onHandleIntent()>> response with code: " + responseCode);
                 switch (responseCode) {
 
                     // If the response is OK
+                    //case HttpStatus.SC_OK:
+                    case HttpStatus.SC_NOT_MODIFIED:
                     case HttpStatus.SC_OK:
-
+                        Log.i(LOG_TAG, "onHandleIntent()>> Report form server: SC_OK" );
                         // Gets the last modified data for the URL
                         long lastModifiedDate = localHttpURLConnection.getLastModified();
 
                         // Reports that the service is parsing
                         mBroadcaster.broadcastIntentWithState(Constants.STATE_ACTION_PARSING);
-
+                        Log.i(LOG_TAG, "onHandleIntent()>> " );
                         /*
                          * Instantiates a pull parser and uses it to parse XML from the RSS feed.
                          * The mBroadcaster argument send a broadcaster utility object to the
@@ -184,9 +187,10 @@ public class RSSPullService extends IntentService {
                          */
                         RSSPullParser localPicasaPullParser = new RSSPullParser();
 
-                        localPicasaPullParser.parseXml(
-                            localURLConnection.getInputStream(),
-                            mBroadcaster);
+
+                            localPicasaPullParser.parseXml(
+                                    localURLConnection.getInputStream(),
+                                    mBroadcaster);
 
                         // Reports that the service is now writing data to the content provider.
                         mBroadcaster.broadcastIntentWithState(Constants.STATE_ACTION_WRITING);
@@ -196,7 +200,7 @@ public class RSSPullService extends IntentService {
 
                         // Stores the number of images
                         int imageVectorSize = imageValues.size();
-
+                        Log.i(LOG_TAG, "onHandleIntent()>> image size = " +imageVectorSize);
                         // Creates one ContentValues for each image
                         ContentValues[] imageValuesArray = new ContentValues[imageVectorSize];
 
@@ -239,6 +243,7 @@ public class RSSPullService extends IntentService {
 
                 // Reports that the feed retrieval is complete.
                 mBroadcaster.broadcastIntentWithState(Constants.STATE_ACTION_COMPLETE);
+                Log.i(LOG_TAG, "onHandleIntent()>> Action_complete " );
             }
 
         // Handles possible exceptions
@@ -254,7 +259,12 @@ public class RSSPullService extends IntentService {
 
             localXmlPullParserException.printStackTrace();
 
-        } finally {
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.i(LOG_TAG, "onHandleIntent()>> Parseing RSS Exception with other exception" );
+
+
+    } finally {
 
             // If an exception occurred, close the cursor to prevent memory leaks.
             if (null != cursor) {

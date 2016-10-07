@@ -70,10 +70,14 @@ public class PhotoThumbnailFragment extends Fragment implements
     private GridViewAdapter mAdapter;
 
     // The URL of the Picasa featured picture RSS feed, in String format
+//    private static final String PICASA_RSS_URL =
+//            "http://picasaweb.google.com/data/feed/base/featured?" +
+//            "alt=rss&kind=photo&access=public&slabel=featured&hl=en_US&imgmax=1600";
+//
+//    private static final String PICASA_RSS_URL =
+//    "http://photos.googleapis.com/data/feed/api/user/105765295943114918309/albumid/5841256210457768945?alt=rss";
     private static final String PICASA_RSS_URL =
-            "http://picasaweb.google.com/data/feed/base/featured?" +
-            "alt=rss&kind=photo&access=public&slabel=featured&hl=en_US&imgmax=1600";
-
+    "https://picasaweb.google.com/data/feed/api/user/115999964287637644901";
     private static final String[] PROJECTION =
     {
         DataProviderContract._ID,

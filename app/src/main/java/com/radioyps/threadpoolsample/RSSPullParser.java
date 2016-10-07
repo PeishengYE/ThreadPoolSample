@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.ContentValues;
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,11 +44,13 @@ public class RSSPullParser extends DefaultHandler {
     private static final String THUMBNAIL = "media:thumbnail";
     
     // An attribute value indicating that the element contains an item
-    private static final String ITEM = "item";
+    //private static final String ITEM = "item";
+    private static final String ITEM = "entry";
 
     // Sets the initial size of the vector that stores data.
     private static final int VECTOR_INITIAL_SIZE = 500;
 
+    private static final String TAG = "RSSPullParser";
     // Storage for a single ContentValues for image data
     private static ContentValues mImage;
     
@@ -89,13 +92,14 @@ public class RSSPullParser extends DefaultHandler {
 
         // Gets the first event in the input sream
         int eventType = localXmlPullParser.getEventType();
-
+        Log.d(TAG, "Evetn Type : "+ eventType);
         // Sets the number of images read to 1
         int imageCount = 1;
 
         // Returns if the current event (state) is not START_DOCUMENT
         if (eventType != XmlPullParser.START_DOCUMENT) {
 
+            Log.d(TAG, "Invail RSS");
             throw new XmlPullParserException("Invalid RSS");
 
         }
@@ -116,26 +120,28 @@ public class RSSPullParser extends DefaultHandler {
 
             // At the end of the feed, exits the loop
             } else if (nextEvent == XmlPullParser.END_DOCUMENT) {
+                Log.d(TAG, "END_DOCUMENT");
                 break;
 
             // At the beginning of the feed, skips the event and continues
             } else if (nextEvent == XmlPullParser.START_DOCUMENT) {
+                Log.d(TAG, "START_DOCUMENT");
                 continue;
 
             // At the start of a tag, gets the tag's name
             } else if (nextEvent == XmlPullParser.START_TAG) {
                 String eventName = localXmlPullParser.getName();
-
+                Log.d(TAG, "EventName : " + eventName);
                 /*
                  * If this is the start of an individual item, logs it and creates a new
                  * ContentValues
                  */
                 if (eventName.equalsIgnoreCase(ITEM)) {
-
+                    Log.d(TAG, "created an new mImage  ");
                     mImage = new ContentValues();
 
                 // If this isn't an item, then checks for other options
-                } else {
+                } else if(mImage != null){
 
                     // Defines keys to store the column names
                     String imageUrlKey;
